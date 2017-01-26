@@ -1,0 +1,22 @@
+{
+	"mainAddress": "localhost:27017",
+	"verbosity":3,
+	"namespaces": {
+		"recipes.scraped": true
+  	},
+	"docManagers": [
+		    {
+		        "docManager": "solr_doc_manager_new",
+		        "targetURL": "http://localhost:8983/solr/ricettesapori",
+		        "uniqueKey": "uid",
+		        "autoCommitInterval": 0,
+			"args":{
+				"query":{"status":"I"},
+				"fields_rename":{
+					"final_extracted_info.text":"body",
+					"final_extracted_info.name":"title"
+					}	
+				}
+		    }
+	]
+}
