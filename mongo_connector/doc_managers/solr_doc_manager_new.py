@@ -77,11 +77,7 @@ class DocManager(DocManagerBase):
         else:
             self.auto_commit_interval = None
         self.chunk_size = chunk_size
-        self.field_list = []
-        self.query = kwargs.get('query', None)  
-        logging.debug('>>>>>>>>>>>>>>>>>> QUERY')
-        #logging.debug('>>>>>>>>>>>>>>>>>>' + self.query)
-        logging.debug(pprint.pformat(self.query,indent=4))                
+        self.field_list = []                    
         self._build_fields()
         self._formatter = DocumentFlattener()
 
