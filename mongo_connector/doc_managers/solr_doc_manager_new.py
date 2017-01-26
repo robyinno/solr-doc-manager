@@ -77,8 +77,10 @@ class DocManager(DocManagerBase):
         else:
             self.auto_commit_interval = None
         self.chunk_size = chunk_size
-        self.field_list = []        
-        self.query = kwargs.get('query', None)             
+        self.field_list = []
+        self.query = kwargs.get('query', None)
+        self.fields_rename = kwargs.get('fields_rename', None)                
+
         self._build_fields()
         self._formatter = DocumentFlattener()
 
@@ -155,6 +157,15 @@ class DocManager(DocManagerBase):
         # with the dot-separated path to each value as the respective key
         flat_doc = self._formatter.format_document(doc)
 
+        if self.fields_rename:
+            new_flat_doc = {}
+            for key,value in flat_doc.items():
+                if key in self.fields_rename:
+                    new_flat_doc.update({self.fields_rename[key]:value})
+                else:
+                    new_flat_doc.update({key:value})
+            flat_doc = new_flat_doc
+
         # Only include fields that are explicitly provided in the
         # schema or match one of the dynamic field patterns, if
         # we were able to retrieve the schema
@@ -163,7 +174,8 @@ class DocManager(DocManagerBase):
                 return field in self.field_list or any(
                     regex.match(field) for regex in self._dynamic_field_regexes
                 )
-            return dict((k, v) for k, v in flat_doc.items() if include_field(k))
+            return dict((k, v) for k, v in flat_doc.items() if include_field(k))            
+
         return flat_doc
 
     def stop(self):
@@ -260,8 +272,8 @@ class DocManager(DocManagerBase):
             return updated
 
     def query_key_value(self,doc):
-        for key,value in self.query.items():                        
-            if key in doc and doc.get(key,None) == value:                
+        for key,value in self.query.items():
+            if key in doc and doc.get(key,None) == value:
                 return True
 
     @wrap_exceptions
@@ -304,15 +316,15 @@ class DocManager(DocManagerBase):
             while batch:
                 if self.query_key_value(batch):
                     self.solr.add(batch, **add_kwargs)
-                else:                    
+                else:
                     logging.debug('document not in the filter')
-                    
+
                 batch = list(next(cleaned)
                              for i in range(self.chunk_size))
         else:
             if self.query_key_value(cleaned):
                 self.solr.add(cleaned, **add_kwargs)
-            else:                
+            else:
                 logging.debug('document not in the filter')
 
     @wrap_exceptions
