@@ -78,8 +78,10 @@ class DocManager(DocManagerBase):
             self.auto_commit_interval = None
         self.chunk_size = chunk_size
         self.field_list = []
-        self.query = kwargs.get('query', {})
-        logging.debug(pprint.PrettyPrinter(indent=4))                
+        self.query = kwargs.get('query', None)  
+        logging.debug('>>>>>>>>>>>>>>>>>> QUERY')
+        #logging.debug('>>>>>>>>>>>>>>>>>>' + self.query)
+        logging.debug(pprint.pformat(self.query,indent=4))                
         self._build_fields()
         self._formatter = DocumentFlattener()
 
@@ -261,8 +263,8 @@ class DocManager(DocManagerBase):
             return updated
 
     def query_key_value(self,doc):
-        for key,value in self.query.items():
-            if key in doc and doc.get(key,None) == value:
+        for key,value in self.query.items():                        
+            if key in doc and doc.get(key,None) == value:                
                 return True
 
     @wrap_exceptions
@@ -282,6 +284,8 @@ class DocManager(DocManagerBase):
             else:
                 self.solr.add([self._clean_doc(doc, namespace, timestamp)],
                               commit=False)
+        else:
+            logging.debug('document not in the filter')
 
     @wrap_exceptions
     def bulk_upsert(self, docs, namespace, timestamp):
@@ -303,11 +307,16 @@ class DocManager(DocManagerBase):
             while batch:
                 if self.query_key_value(batch):
                     self.solr.add(batch, **add_kwargs)
+                else:                    
+                    logging.debug('document not in the filter')
+                    
                 batch = list(next(cleaned)
                              for i in range(self.chunk_size))
         else:
             if self.query_key_value(cleaned):
                 self.solr.add(cleaned, **add_kwargs)
+            else:                
+                logging.debug('document not in the filter')
 
     @wrap_exceptions
     def insert_file(self, f, namespace, timestamp):
