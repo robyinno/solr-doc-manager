@@ -2,13 +2,15 @@ Getting Started
 ---------------
 This is a modified version of original https://github.com/mongodb-labs/solr-doc-manager
 
-I have edded a filter by field value
+I have edded: 
+1) filter by field value 
+2) remapping of solr fields name
 
 If you want to update solr only with a document with a particular field value you can add in the config.py
 inside the args the query keyword
 
 example of config.json file ::
-
+	
 	{
 	        "mainAddress": "localhost:27017",
 	        "verbosity":3,
@@ -19,14 +21,19 @@ example of config.json file ::
 	                    {
 	                        "docManager": "solr_doc_manager_new",
 	                        "targetURL": "http://localhost:8983/solr/mycollection1",
-	                        "uniqueKey": "_id",
+	                        "uniqueKey": "uid",
 	                        "autoCommitInterval": 0,
 	                        "args":{
-	                                "query":{"status":"I"}
+	                                "query":{"status":"I"},
+	                                "fields_rename":{
+	                                        "final_extracted_info.text":"body",
+	                                        "final_extracted_info.name":"title"
+	                                        }
 	                                }
 	                    }
 	        ]
 	}
+
 
 Usage
 ~~~~~~~~~~~~
