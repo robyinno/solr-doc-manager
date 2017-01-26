@@ -32,8 +32,8 @@ Usage
 ~~~~~~~~~~~~
 You need to go in to the dir where you have gitted this project and you need to
 make export PYTHONPATH=.
-then you can start mongo-connector with `mongo-connector -c /home/roberto/config.json`
+then you can start mongo-connector with ``mongo-connector -c /home/roberto/config.json``
 
-Above you can see the config.json file content where there is:: 
+Above you can see the config.json file content where there is ::
  	"docManager": "solr_doc_manager_new"
 
