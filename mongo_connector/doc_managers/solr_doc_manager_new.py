@@ -263,18 +263,33 @@ class DocManager(DocManagerBase):
         # Results is an iterable containing only 1 result
         for doc in results:
             # Remove metadata previously stored by Mongo Connector.
-            doc.pop('ns')
-            doc.pop('_ts')
-            updated = self.apply_update(doc, update_spec)
+                    
+            if not self._query_key_value(doc):                
+                self.remove(doc[self.unique_key],1,1)
+                return False                
+            else:                
+                doc.pop('ns')
+                doc.pop('_ts')
+                
+                updated = self.apply_update(doc, update_spec)
             # A _version_ of 0 will always apply the update
-            updated['_version_'] = 0
-            self.upsert(updated, namespace, timestamp)
-            return updated
+                updated['_version_'] = 0
+                self.upsert(updated, namespace, timestamp)
+                return updated
+            
+        if len(results) == 0: ## if doesn't exist anymore
+            doc = {}
+            doc[self.unique_key] =  document_id                      
+            updated = self.apply_update(doc, update_spec)
+            self.upsert(updated, namespace, timestamp)                                    
 
-    def query_key_value(self,doc):
-        for key,value in self.query.items():
-            if key in doc and doc.get(key,None) == value:
-                return True
+    def _query_key_value(self,doc):
+        if self.query:            
+            for key,value in self.query.items():
+                if key in doc and doc.get(key,None) == value:                    
+                    return True
+        else:
+            return True
 
     @wrap_exceptions
     def upsert(self, doc, namespace, timestamp):
@@ -285,7 +300,7 @@ class DocManager(DocManagerBase):
         always be one mongo document, represented as a Python dictionary.
         """
 
-        if self.query_key_value(doc):
+        if self._query_key_value(doc):            
             if self.auto_commit_interval is not None:
                 self.solr.add([self._clean_doc(doc, namespace, timestamp)],
                               commit=(self.auto_commit_interval == 0),
@@ -314,7 +329,7 @@ class DocManager(DocManagerBase):
         if self.chunk_size > 0:
             batch = list(next(cleaned) for i in range(self.chunk_size))
             while batch:
-                if self.query_key_value(batch):
+                if self._query_key_value(batch):
                     self.solr.add(batch, **add_kwargs)
                 else:
                     logging.debug('document not in the filter')
@@ -322,7 +337,7 @@ class DocManager(DocManagerBase):
                 batch = list(next(cleaned)
                              for i in range(self.chunk_size))
         else:
-            if self.query_key_value(cleaned):
+            if self._query_key_value(cleaned):
                 self.solr.add(cleaned, **add_kwargs)
             else:
                 logging.debug('document not in the filter')
