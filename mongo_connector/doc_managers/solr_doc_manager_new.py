@@ -77,7 +77,8 @@ class DocManager(DocManagerBase):
         else:
             self.auto_commit_interval = None
         self.chunk_size = chunk_size
-        self.field_list = []                    
+        self.field_list = []        
+        self.query = kwargs.get('query', None)             
         self._build_fields()
         self._formatter = DocumentFlattener()
 
