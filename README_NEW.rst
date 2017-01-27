@@ -1,16 +1,23 @@
 Getting Started
 ---------------
+Warning
+-------
+At this stage of development, when you update a filtered field that before have not satisfied the args.query field filter,
+and now it satisfy the filter it reinsert in solr only the updates document info that the oplog contains,
+it's needed to add to get all the document infos from mongodb.
+
+
 This is a modified version of original https://github.com/mongodb-labs/solr-doc-manager
 
-I have edded: 
-1) filter by field value 
+I have edded:
+1) filter by field value
 2) remapping of solr fields name
 
 If you want to update solr only with a document with a particular field value you can add in the config.py
 inside the args the query keyword
 
 example of config.json file ::
-	
+
 	{
 	        "mainAddress": "localhost:27017",
 	        "verbosity":3,
@@ -43,4 +50,3 @@ then you can start mongo-connector with ``mongo-connector -c /home/roberto/confi
 
 Above you can see the config.json file content where there is ::
  	"docManager": "solr_doc_manager_new"
-
